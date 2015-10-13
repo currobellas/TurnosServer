@@ -1,11 +1,17 @@
 package com.currobellas;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 /**
  * Created by curro on 11/10/15.
  */
-public class Peticion {
+public class Peticion implements Serializable {
     private String dni;
     private long horaPeticion; // Momento en que se realiza la petición
+    private int tipo; // 0: corrección;  1: duda; 2: otros
 
 
 
@@ -28,7 +34,7 @@ public class Peticion {
         return tipoPeticion[tipo];
     }
 
-    private int tipo; // 0: corrección;  1: duda; 2: otros
+
 
     private final String[] tipoPeticion= {"Corrección", "Dudas", "Otro"};
 
@@ -47,4 +53,6 @@ public class Peticion {
 
         return this.getDni().equals(externa.getDni());
     }
+
+
 }

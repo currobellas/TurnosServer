@@ -1,9 +1,6 @@
 package com.currobellas;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -36,11 +33,12 @@ public class Conexion extends Thread {
     public Conexion() {
     }
 
-    public Conexion(int puerto, Map<String, Alumno> alumnos, ArrayList<Peticion> peticiones) {
+    public Conexion(int puerto, Map<String, Alumno> alumnos) {
 
         this.puerto = puerto;
         this.alumnos = alumnos;
-        this.peticiones = peticiones;
+       // this.peticiones = peticiones;
+        this.leePeticiones();
     }
 
     public void finalizarConexion(){
@@ -107,6 +105,7 @@ public class Conexion extends Thread {
                            pw.flush();
                        } else {
                            peticiones.add(peticion);
+                           this.guardaPeticiones();
                            pw.println(Protocolo.OK+ " Añadido"); // SOlo si se ha podido añadir
                            pw.flush();
                        }
@@ -120,6 +119,7 @@ public class Conexion extends Thread {
 
                            pw.println(Protocolo.OK + " Borrado");//Solo si se ha podido eliminar
                            pw.flush();
+                           this.guardaPeticiones();
                        } else {
                            pw.println(Protocolo.ERROR + ": Usuario no en lista");//Solo si se ha podido eliminar
                            pw.flush();
@@ -128,9 +128,14 @@ public class Conexion extends Thread {
                        break;
                    case Protocolo.LIST:
                        pw.println("Lista de peticiones");
+                       System.err.println(peticiones.size());
                        for (Peticion p:peticiones){
                            Alumno a=alumnos.get(p.getDni());
-                           pw.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n",p.getDni(),a.getNombre(),a.getApellidos(),p.getHoraPeticion());
+                          try {
+                              System.out.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n", p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
+
+                              pw.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n", p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
+                          }catch(Exception es){}
                        }
                        pw.flush();
                        break;
@@ -183,5 +188,44 @@ public class Conexion extends Thread {
     private boolean existePeticion(String usuario){
         Peticion p= new Peticion(usuario,0);
         return existePeticion(p);
+    }
+
+
+    private boolean guardaPeticiones(){
+        try {
+            ObjectOutputStream archivo = new ObjectOutputStream(new FileOutputStream("peticiones.obj"));
+            for (Peticion p: peticiones)
+                archivo.writeObject(p);
+            archivo.writeObject(new Peticion("EOF",0)); // Marca de fin de archivo
+            archivo.close();
+            return true;
+        } catch (IOException ex){
+            System.err.println("Error al guardar peticiones");
+        }
+        return false;
+    }
+
+    private boolean leePeticiones(){
+        peticiones=new ArrayList<Peticion>();
+        try {
+            ObjectInputStream archivo = new ObjectInputStream(new FileInputStream("peticiones.obj"));
+            Peticion p = null;
+            p = (Peticion) archivo.readObject();
+            while (p != null && !p.getDni().equals("EOF")) {
+                peticiones.add(p);
+                System.err.println(p.getDni());
+                p = (Peticion) archivo.readObject();
+
+            }
+            archivo.close();
+        }catch(EOFException ex){
+
+        }catch(IOException ex){
+            System.err.println("Error al leer el archivo o archivo inexistente\n"+ex.getMessage());
+        }catch(ClassNotFoundException ex){
+            System.err.println("Error de serialización a leer el archivo");
+        }
+
+        return false;
     }
 }

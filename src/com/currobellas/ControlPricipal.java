@@ -8,7 +8,7 @@ import java.util.*;
  */
 public class ControlPricipal {
     private Map<String,Alumno> alumnos = new HashMap<String, Alumno>();
-    private ArrayList<Peticion> peticiones = new ArrayList<Peticion>();
+    //private ArrayList<Peticion> peticiones = new ArrayList<Peticion>();
 
     private Conexion con;
 
@@ -33,7 +33,7 @@ public class ControlPricipal {
     }
 
     public void inicio(){
-        con=new Conexion(5001, alumnos,peticiones);
+        con=new Conexion(5001, alumnos);
         Scanner sc=new Scanner(System.in);
 
         System.out.println("Hi");
