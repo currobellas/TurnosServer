@@ -6,13 +6,13 @@ import java.util.*;
 /**
  * Created by curro on 11/10/15.
  */
-public class ControlPricipal {
+public class ControlPrincipal {
     private Map<String,Alumno> alumnos = new HashMap<String, Alumno>();
     //private ArrayList<Peticion> peticiones = new ArrayList<Peticion>();
 
     private Conexion con;
 
-    public ControlPricipal(){
+    public ControlPrincipal(){
         String linea;
         try {
             //System.out.println("Working Directory = " + System.getProperty("user.dir"));

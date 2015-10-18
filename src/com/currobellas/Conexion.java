@@ -17,8 +17,8 @@ public class Conexion extends Thread {
     private boolean funcionando=true;
     private ServerSocket ss;
     private Socket s=null;
-    private Map<String, Alumno> alumnos;
-    private ArrayList<Peticion> peticiones;
+    public  static Map<String, Alumno> alumnos;
+    public static ArrayList<Peticion> peticiones;
 
 
     public boolean isFuncionando() {
@@ -36,7 +36,7 @@ public class Conexion extends Thread {
     public Conexion(int puerto, Map<String, Alumno> alumnos) {
 
         this.puerto = puerto;
-        this.alumnos = alumnos;
+        Conexion.alumnos = alumnos;
        // this.peticiones = peticiones;
         this.leePeticiones();
     }
@@ -64,8 +64,10 @@ public class Conexion extends Thread {
             //TODO Comprobación de puerto ocupado
             System.out.printf("Servidor a la espera en el puerto %d", this.puerto);
             while (funcionando) {
+
                 s=ss.accept();
-                estableceConexion(s);
+                HiloCliente cliente= new HiloCliente(s);
+                cliente.start();
             }
         }catch (IOException ex){
 
@@ -75,123 +77,18 @@ public class Conexion extends Thread {
     }
 
     private void estableceConexion(Socket s) throws IOException{
-        String mensaje;
-       try{
-           Scanner sc=new Scanner(s.getInputStream());
 
-           // TODO: O metemos timeouts o cada cliente en un hilo
-
-           // Recepción de usuario
-           mensaje=sc.nextLine();
-           String codigo=compruebaUsuario(mensaje);
-
-           // Envío del OK o ERROR
-           PrintWriter pw = new PrintWriter(s.getOutputStream());
-           pw.println(codigo);
-           pw.flush();
-
-           // Si no hay error seguimos
-           if (codigo.equals(Protocolo.OK)){
-               String usuario=mensaje.split(" ")[1].toUpperCase().trim();
-               Peticion peticion= new Peticion(usuario, 0);
-               mensaje= sc.nextLine().toUpperCase().trim();
-               //codigo=compruebaComando(mensaje);
-               switch (mensaje){
-                   case Protocolo.ADD:
-                       // todo: Añadir Usuario
-
-                       if (existePeticion(peticion)){
-                           pw.println(Protocolo.ERROR+ ": Usuario en lista. No añadido."); // SOlo si se ha podido añadir
-                           pw.flush();
-                       } else {
-                           peticiones.add(peticion);
-                           this.guardaPeticiones();
-                           pw.println(Protocolo.OK+ " Añadido"); // SOlo si se ha podido añadir
-                           pw.flush();
-                       }
-
-
-                       break;
-                   case Protocolo.DELETE:
-                   // todo: Eliminar Usuario
-
-                       if(peticiones.remove(peticion)) {
-
-                           pw.println(Protocolo.OK + " Borrado");//Solo si se ha podido eliminar
-                           pw.flush();
-                           this.guardaPeticiones();
-                       } else {
-                           pw.println(Protocolo.ERROR + ": Usuario no en lista");//Solo si se ha podido eliminar
-                           pw.flush();
-                       }
-                        // todo Actualizar lista de peticiones
-                       break;
-                   case Protocolo.LIST:
-                       pw.println("Lista de peticiones");
-                       System.err.println(peticiones.size());
-                       for (Peticion p:peticiones){
-                           Alumno a=alumnos.get(p.getDni());
-                          try {
-                              System.out.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n", p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
-
-                              pw.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n", p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
-                          }catch(Exception es){}
-                       }
-                       pw.flush();
-                       break;
-                   default: //ERROR
-                       pw.println(Protocolo.ERROR+": Comando no válido");
-                       pw.flush();
-                       break;
-               }
-
-           }
-
-       } finally {
-           s.close();
-       }
 
     }
 
-    /**
-     * Comprueba si el mensaje (USER DNI) es correcto y extrae el usuario.
-     * Informa si el usurio existe o no. O si no es válido el mensaje
-     * @param mensaje
-     * @return  OK si _todo está bien.
-     *          ERROR02 si no existe usuario.
-     *          ERROR01 si mensaje no válido.
-     */
-    private String compruebaUsuario(String mensaje){
-
-        String[] partes = mensaje.toUpperCase().split(" ");
-
-       // System.out.printf("\nlongitud:%d   _%s___%s_",partes.length,partes[0],partes[1]);
-
-        if (partes.length!=2 || !partes[0].trim().equals(Protocolo.USER))
-            return Protocolo.ERROR+"01";
-
-        if (!alumnos.containsKey(partes[1].trim().toUpperCase()))
-            return Protocolo.ERROR+"02";
-
-        return Protocolo.OK;
-    }
-
-    private boolean existePeticion(Peticion peticion){
-        for (Peticion p:peticiones){
-            if (p.equals(peticion))
-                return true;
-
-        }
-        return false;
-    }
-
-    private boolean existePeticion(String usuario){
-        Peticion p= new Peticion(usuario,0);
-        return existePeticion(p);
-    }
 
 
-    private boolean guardaPeticiones(){
+
+
+
+
+
+    public static synchronized boolean guardaPeticiones(){
         try {
             ObjectOutputStream archivo = new ObjectOutputStream(new FileOutputStream("peticiones.obj"));
             for (Peticion p: peticiones)
@@ -227,5 +124,31 @@ public class Conexion extends Thread {
         }
 
         return false;
+    }
+
+    public static  synchronized boolean eliminaPeticion(Peticion peticion){
+        return peticiones.remove(peticion);
+
+    }
+
+    public static synchronized boolean anadePeticion(Peticion peticion){
+        return peticiones.add(peticion);
+    }
+
+    public static synchronized ArrayList<Peticion> listaPeticiones(){
+        return peticiones;
+    }
+
+    public static synchronized boolean existePeticion(Peticion peticion){
+        for (Peticion p:Conexion.peticiones){
+            if (p.equals(peticion))
+                return true;
+
+        }
+        return false;
+    }
+    public static synchronized boolean existePeticion(String usuario){
+        Peticion p= new Peticion(usuario,0);
+        return existePeticion(p);
     }
 }
