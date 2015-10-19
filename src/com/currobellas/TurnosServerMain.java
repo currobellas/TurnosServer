@@ -10,6 +10,7 @@ public class TurnosServerMain {
 
         ControlPrincipal control = new ControlPrincipal();
 
+
         control.inicio();
 
 

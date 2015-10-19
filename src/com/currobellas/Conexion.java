@@ -131,6 +131,14 @@ public class Conexion extends Thread {
 
     }
 
+    public static  synchronized boolean eliminaPeticion(int posicion){
+        try {
+            peticiones.remove(posicion);
+            return true;
+        } catch (IndexOutOfBoundsException ex){}
+        return false;
+
+    }
     public static synchronized boolean anadePeticion(Peticion peticion){
         return peticiones.add(peticion);
     }
@@ -150,5 +158,12 @@ public class Conexion extends Thread {
     public static synchronized boolean existePeticion(String usuario){
         Peticion p= new Peticion(usuario,0);
         return existePeticion(p);
+    }
+
+    public static synchronized void insertaPeticion(Peticion p, int posicion) throws IndexOutOfBoundsException{
+
+            peticiones.add(posicion, p);
+
+
     }
 }

@@ -24,6 +24,11 @@ public final class Protocolo {
     public static final String ADD="ADD";
     public static final String DELETE="DEL";
     public static final String LIST="LIST";
+    public static final String ADMIN="ROOT";
+    public static final String DELROOT="DR"; // El root puede usar este comando para eliminar cualquier entrada indicando el número
+    public static final String EXIT="EXIT"; // sale de la cuenta de root
+    public static final String INSERT="INSERT"; // El root puede insertar una nueva petición donde quiera
+    public static final String DELALL="DELALL"; //El root puede borrar todo el listado de peticiones
 
     public static final String OK="OK";
     public static final String ERROR="ERROR";
