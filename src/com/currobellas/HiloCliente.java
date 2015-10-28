@@ -114,7 +114,7 @@ public class HiloCliente extends  Thread {
                                     try {
                                         System.out.printf("Usuario: %s  Nombre: %s %s  Hora:%tT\n", p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
 
-                                        pw.printf("%d. Usuario: %s  Nombre: %s %s  Hora:%tT\n", indice, p.getDni(), a.getNombre(), a.getApellidos(), p.getHoraPeticion());
+                                        pw.printf("%d. Nombre: %s %s  Hora:%tT\n", indice, a.getNombre(), a.getApellidos(), p.getHoraPeticion());
                                         indice++;
                                     } catch (Exception es) {
                                     }
