@@ -91,9 +91,11 @@ public class HiloCliente extends  Thread {
 
                                 break;
                             case Protocolo.DELETE:
-                                // todo: Eliminar Usuario
 
-                                if (Conexion.eliminaPeticion(peticion)) {
+
+                                pw.println("Opción deshabilitada");//Solo si se ha podido eliminar
+                                pw.flush();
+                             /*   if (Conexion.eliminaPeticion(peticion)) {
 
                                     pw.println(Protocolo.OK + " Borrado");//Solo si se ha podido eliminar
                                     pw.flush();
@@ -101,7 +103,7 @@ public class HiloCliente extends  Thread {
                                 } else {
                                     pw.println(Protocolo.ERROR + ": Usuario no en lista");//Solo si se ha podido eliminar
                                     pw.flush();
-                                }
+                                }*/
                                 // todo Actualizar lista de peticiones
                                 break;
                             case Protocolo.LIST:
